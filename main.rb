@@ -1,4 +1,5 @@
 require 'sinatra'
+require 'sinatra/reload' if development?
 require 'slim'
 require 'sass'
 require 'v8'
