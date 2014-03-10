@@ -35,7 +35,9 @@ String::tokens = ->
   ONELINECOMMENT = /\/\/.*/g
   MULTIPLELINECOMMENT = /\/[*](.|\n)*?[*]\//g
   ONECHAROPERATORS = /([-+*\/=()&|;:,<>{}[\]])/g
+  COMPARISON = /[<>=!]=|[<>]/g	
   tokens = [
+	COMPARISON
     WHITES
     ID
     NUM
@@ -44,7 +46,7 @@ String::tokens = ->
     MULTIPLELINECOMMENT
     ONECHAROPERATORS
   ]
-  RESERVED_WORD = p: "P"
+  RESERVED_WORD = p: "P" if: "IF" then: "THEN"
   
   # Make a token object.
   make = (type, value) ->
@@ -144,11 +146,29 @@ parse = (input) ->
       result =
         type: "P"
         value: right
+    else if lookahead and lookahead.type is "IF"
+	  match "IF"
+	  left = condition()
+	  match "THEM"
+	  rigth = statement()
+	  result = 
+		type: "IF"
+		left: left
+		rigth: rigth	
     else # Error!
       throw "Syntax Error. Expected identifier but found " + 
         (if lookahead then lookahead.value else "end of input") + 
         " near '#{input.substr(lookahead.from)}'"
     result
+    
+  condition = ->
+	left = expresion()
+	match "COMPARISON"     
+	rigth = expresion()
+	result:
+	  type: value
+	  left: left
+	  rigth: right
 
   expression = ->
     result = term()
