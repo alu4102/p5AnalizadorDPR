@@ -44,8 +44,19 @@ String::tokens = ->
     MULTIPLELINECOMMENT
     ONECHAROPERATORS
   ]
-  RESERVED_WORD = p: "P"
-  
+  RESERVED_WORD = 
+    p: "P", 
+    const: "CONST",
+    procedure: "PROCEDURE",
+    if: "IF",
+    then: "THEN",
+    do: "DO",
+    while: "WHILE",
+    begin: "BEGIN",
+    end: "END",
+    odd: "ODD",
+    call: "CALL"
+
   # Make a token object.
   make = (type, value) ->
     type: type
@@ -120,7 +131,27 @@ parse = (input) ->
   statements = ->
     result = [statement()]
     while lookahead and lookahead.type is ";"
+      resultAux = null
       match ";"
+
+	    if (lookahead.type is "CONST") 
+        do  
+            result.push statement()
+        while (lookahead.type is ",");
+        match ";"
+      
+      if (lookahead.type is "VAR") 
+        do 
+            result.push factor()
+        while (lookahead.type is ",");
+        match ";"
+      
+      while (lookahead.type is "PROCEDURE") 
+        match "ID"
+        match ";"
+        statements()
+        match ";"
+      
       result.push statement()
     (if result.length is 1 then result[0] else result)
 
