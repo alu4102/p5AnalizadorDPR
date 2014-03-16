@@ -28,25 +28,20 @@ String::tokens = ->
   n = undefined # The number value.
   m = undefined # Matching
   result = [] # An array to hold the results.
-  WHITES = /\s+/g
-  ID = /[a-zA-Z_]\w*/g
-  NUM = /\b\d+(\.\d*)?([eE][+-]?\d+)?\b/g
-  STRING = /('(\\.|[^'])*'|"(\\.|[^"])*")/g
-  ONELINECOMMENT = /\/\/.*/g
-  MULTIPLELINECOMMENT = /\/[*](.|\n)*?[*]\//g
-  ONECHAROPERATORS = /([-+*\/=()&|;:,<>{}[\]])/g
-  COMPARISON = /[<>=!]=|[<>]/g	
-  tokens = [
-	COMPARISON
-    WHITES
-    ID
-    NUM
-    STRING
-    ONELINECOMMENT
-    MULTIPLELINECOMMENT
-    ONECHAROPERATORS
-  ]
-  RESERVED_WORD = p: "P" if: "IF" then: "THEN"
+  tokens =
+    WHITES: /\s+/g
+    ID: /[a-zA-Z_]\w*/g
+    NUM: /\b\d+(\.\d*)?([eE][+-]?\d+)?\b/g
+    STRING: /('(\\.|[^'])*'|"(\\.|[^"])*")/g
+    ONELINECOMMENT: /\/\/.*/g
+    MULTIPLELINECOMMENT: /\/[*](.|\n)*?[*]\//g
+    COMPARISONOPERATOR: /[<>=!]=|[<>]/g
+    ONECHAROPERATORS: /([-+*\/=()&|;:,{}[\]])/g
+
+  RESERVED_WORD = 
+    p:    "P"
+    "if": "IF"
+    then: "THEN"
   
   # Make a token object.
   make = (type, value) ->
@@ -66,20 +61,19 @@ String::tokens = ->
   
   # Loop through this text
   while i < @length
-    tokens.forEach (t) -> # Only ECMAScript5
-      t.lastIndex = i
-      return
+    for key, value of tokens
+      value.lastIndex = i
 
     from = i
     
     # Ignore whitespace and comments
-    if m = WHITES.bexec(this) or 
-           (m = ONELINECOMMENT.bexec(this)) or 
-           (m = MULTIPLELINECOMMENT.bexec(this))
+    if m = tokens.WHITES.bexec(this) or 
+           (m = tokens.ONELINECOMMENT.bexec(this)) or 
+           (m = tokens.MULTIPLELINECOMMENT.bexec(this))
       getTok()
     
     # name.
-    else if m = ID.bexec(this)
+    else if m = tokens.ID.bexec(this)
       rw = RESERVED_WORD[m[0]]
       if rw
         result.push make(rw, getTok())
@@ -87,7 +81,7 @@ String::tokens = ->
         result.push make("ID", getTok())
     
     # number.
-    else if m = NUM.bexec(this)
+    else if m = tokens.NUM.bexec(this)
       n = +getTok()
       if isFinite(n)
         result.push make("NUM", n)
@@ -95,12 +89,15 @@ String::tokens = ->
         make("NUM", m[0]).error "Bad number"
     
     # string
-    else if m = STRING.bexec(this)
+    else if m = tokens.STRING.bexec(this)
       result.push make("STRING", 
                         getTok().replace(/^["']|["']$/g, ""))
     
+    # comparison operator
+    else if m = tokens.COMPARISONOPERATOR.bexec(this)
+      result.push make("COMPARISON", getTok())
     # single-character operator
-    else if m = ONECHAROPERATORS.bexec(this)
+    else if m = tokens.ONECHAROPERATORS.bexec(this)
       result.push make(m[0], getTok())
     else
       throw "Syntax error near '#{@substr(i)}'"
@@ -147,28 +144,30 @@ parse = (input) ->
         type: "P"
         value: right
     else if lookahead and lookahead.type is "IF"
-	  match "IF"
-	  left = condition()
-	  match "THEM"
-	  rigth = statement()
-	  result = 
-		type: "IF"
-		left: left
-		rigth: rigth	
+      match "IF"
+      left = condition()
+      match "THEN"
+      right = statement()
+      result =
+        type: "IF"
+        left: left
+        right: right
     else # Error!
       throw "Syntax Error. Expected identifier but found " + 
         (if lookahead then lookahead.value else "end of input") + 
         " near '#{input.substr(lookahead.from)}'"
     result
-    
+
   condition = ->
-	left = expresion()
-	match "COMPARISON"     
-	rigth = expresion()
-	result:
-	  type: value
-	  left: left
-	  rigth: right
+    left = expression()
+    type = lookahead.value
+    match "COMPARISON"
+    right = expression()
+    result =
+      type: type
+      left: left
+      right: right
+    result
 
   expression = ->
     result = term()
