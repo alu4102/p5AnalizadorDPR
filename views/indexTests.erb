@@ -1,0 +1,10 @@
+#mocha
+script src="tests/chai.js" 
+script src="/tests/mocha.js" 
+script src="main.js" 
+script src="parse.js" 
+script src="tokens.js" 
+javascript:
+  | mocha.setup('tdd')%script{:src => "/tests/tests.js"}
+javascript:
+  | mocha.run();
