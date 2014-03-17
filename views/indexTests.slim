@@ -7,18 +7,12 @@ script src="/tests/main.js"
 javascript:
    mocha.run(); 
 
-
-
-p This website contains a simple example of a predictive parser
 /img src="/images/st.gif" alt="Syntax Tree"
-#header.header
-  p
-    | Load example to parse
+#header.hidden
   div
     textarea#original[autofocus cols="80" rows="5"]
-  br
   div
-    .loadfile
+    .hidden
       button#example1[type="button" onclick="dump('/examples/example1.txt');"]
         | example1
       button#example2[type="button" onclick="dump('/examples/example2.txt');"]
@@ -55,5 +49,5 @@ p This website contains a simple example of a predictive parser
         }
 
 
-input#PARSE.mylink[value="parse" type="button"]
-pre#OUTPUT
+input#PARSE.hidden[value="parse" type="button"]
+pre#OUTPUT.hidden

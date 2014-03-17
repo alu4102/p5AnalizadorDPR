@@ -1,22 +1,26 @@
-p This website contains a simple example of a predictive parser
+p Para analizar un código introdúzcalo en el cuadro de abajo. 
 /img src="/images/st.gif" alt="Syntax Tree"
 #header.header
-  p
-    | Load example to parse
   div
-    textarea#original[autofocus cols="80" rows="5"]
-  br
+    textarea#original[autofocus cols="80" rows="10"]
   div
-    .loadfile
-      button#example1[type="button" onclick="dump('/examples/example1.txt');"]
-        | example1
-      button#example2[type="button" onclick="dump('/examples/example2.txt');"]
-        | example2
-      button#example3[type="button" onclick="dump('/examples/example3.txt');"]
-        | example3
-      button#exampleerr[type="button" onclick="dump('/examples/example_err.txt');"]
-        | example_err
-      input#files type="file" 
+    br
+    button#example1[class="myButton" type="button" onclick="dump('/examples/example1.txt');"]
+      | Código Ejemplo 1
+    button#example2[class="myButton" type="button" onclick="dump('/examples/example2.txt');"]
+      | Código Ejemplo 2
+    button#example3[class="myButton" type="button" onclick="dump('/examples/example3.txt');"]
+      | Código Ejemplo 3
+    button#exampleerr[class="myButton" type="button" onclick="dump('/examples/example_err.txt');"]
+      | Código Ejemplo Error
+    
+  div
+    p
+      | O seleccione un fichero con su código.
+    input#files type="file" 
+    br
+    br
+    input#PARSE.mylink[class="myButtonAnalizar" value="Analizar el código" type="button"] 
 
     javascript:
         function dump(fileName) {
@@ -42,7 +46,9 @@ p This website contains a simple example of a predictive parser
           }
           else { alert("Failed to load file"); }
         }
-
-
-input#PARSE.mylink[value="parse" type="button"]
+br
+p Árbol generado: 
 pre#OUTPUT
+br
+br 
+

@@ -10,9 +10,36 @@ html lang="en"
     script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"
     script src="/javascripts/main.js"
   body
-    header
-      h1 Predictive Recursive Descent Parser
-      == slim :nav
+    header 
+      center
+        img.ima height="110" src="images/logo.png" width="640" /
+      br/
+
+
+      #cssmenu
+        ul
+          li
+            a href="/" 
+              span Home
+          li
+            a href="/grammar" 
+              span Gramática
+          li
+            a href="/tests" 
+              span Pruebas
+          li
+            a href="https://github.com/alu4102/p5AnalizadorDPR" 
+              span Repositorio
+          li.has-sub.last
+            a href="#" 
+              span Autores
+            ul
+              li
+                a href="https://github.com/alu4102" 
+                  span Sara
+              li.last
+                a href="https://github.com/alu4073" 
+                  span Adrián
     section
       == yield
     /!footer
