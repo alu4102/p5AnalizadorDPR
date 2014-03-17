@@ -36,7 +36,10 @@ String::tokens = ->
     ONELINECOMMENT: /\/\/.*/g
     MULTIPLELINECOMMENT: /\/[*](.|\n)*?[*]\//g
     COMPARISONOPERATOR: /[<>=!]=|[<>]/g
-    ONECHAROPERATORS: /([-+*\/=()&|;:,{}[\]])/g
+    ADDOP: /[+-]/g
+    DIVMULTOP: /[*\/]/g
+    ONECHAROPERATORS: /([*=()&|;:,{}[\]])/g
+    
 
   RESERVED_WORD = 
     p:    "P"
@@ -92,7 +95,12 @@ String::tokens = ->
     else if m = tokens.STRING.bexec(this)
       result.push make("STRING", 
                         getTok().replace(/^["']|["']$/g, ""))
-    
+    # add operator
+    else if m = tokens.ADDOP.bexec(this)
+      result.push make("ADDOP", getTok())
+    # div operator
+    else if m = tokens.DIVMULTOP.bexec(this)
+      result.push make("DIVMULTOP", getTok())
     # comparison operator
     else if m = tokens.COMPARISONOPERATOR.bexec(this)
       result.push make("COMPARISON", getTok())
@@ -171,14 +179,26 @@ parse = (input) ->
 
   expression = ->
     result = term()
-    if lookahead and lookahead.type is "+"
-      match "+"
-      right = expression()
-      result =
-        type: "+"
-        left: result
-        right: right
-    result
+    if lookahead and lookahead.type is "ADDOP"
+      while lookahead and lookahead.type is "ADDOP"
+        type = lookahead.value
+        match "ADDOP"
+        right = term()
+        result =
+          type: type
+          left: result
+          right: right
+      result
+    else if lookahead and lookahead.type is "DIVMULTOP"
+      while lookahead and lookahead.type is "DIVMULTOP"
+        type = lookahead.value
+        match "DIVMULTOP"
+        right = term()
+        result =
+          type: type
+          left: result
+          right: right
+      result
 
   term = ->
     result = factor()
