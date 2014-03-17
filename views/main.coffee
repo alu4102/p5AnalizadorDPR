@@ -6,9 +6,15 @@ main = ()->
     result = """<div class="error">#{result}</div>"""
 
   OUTPUT.innerHTML = result
+  if window.localStorage
+    localStorage.INPUT = source
+    localStorage.OUTPUT = result
 
 window.onload = ()-> 
   PARSE.onclick = main
+  if window.localStorage and localStorage.ORIGINAL and localStorage.OUTPUT
+    document.getElementById("original").innerHTML = localStorage.INPUT
+    document.getElementById("OUTPUT").innerHTML = localStorage.OUTPUT
 
 Object.constructor::error = (message, t) ->
   t = t or this
@@ -223,6 +229,7 @@ parse = (input) ->
         left: left
         right: right
       result
+
   expression = ->
     result = term()
     if lookahead and lookahead.type is "ADDOP"
@@ -242,6 +249,15 @@ parse = (input) ->
         right = term()
         result =
           type: type
+          left: result
+          right: right
+      result
+    else
+      if lookahead and lookahead.type is "+"
+        match "+"
+        right = expression()
+        result =
+          type: "+"
           left: result
           right: right
       result
