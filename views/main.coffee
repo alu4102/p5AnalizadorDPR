@@ -45,6 +45,8 @@ String::tokens = ->
     p:    "P"
     "if": "IF"
     then: "THEN"
+    odd: "odd"
+    call: "call"
   
   # Make a token object.
   make = (type, value) ->
@@ -137,7 +139,6 @@ parse = (input) ->
       left =
         type: "ID"
         value: lookahead.value
-
       match "ID"
       match "="
       right = expression()
@@ -145,6 +146,15 @@ parse = (input) ->
         type: "="
         left: left
         right: right
+    else if lookahead and lookahead.type is "call"
+	  match "call"
+	  rigth = 
+		type: "ID"
+		value: lookahead.value
+	  match "ID"
+	  result = 
+		type: "call"
+		rigth: rigth  
     else if lookahead and lookahead.type is "P"
       match "P"
       right = expression()
@@ -167,15 +177,22 @@ parse = (input) ->
     result
 
   condition = ->
-    left = expression()
-    type = lookahead.value
-    match "COMPARISON"
-    right = expression()
-    result =
-      type: type
-      left: left
-      right: right
-    result
+	if lookahead and lookahead.type is "odd"
+	  match "odd"
+	  right = expression()
+	  result =
+		type: "odd"
+		value: rigth
+	else 
+	  left = expression()
+	  type = lookahead.value
+	  match "COMPARISON"
+	  right = expression()
+	  result =
+		type: type
+		left: left
+		right: right
+	  result
 
   expression = ->
     result = term()
