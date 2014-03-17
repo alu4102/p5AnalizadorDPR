@@ -223,7 +223,6 @@ parse = (input) ->
         left: left
         right: right
       result
-
   expression = ->
     result = term()
     if lookahead and lookahead.type is "ADDOP"
@@ -243,15 +242,6 @@ parse = (input) ->
         right = term()
         result =
           type: type
-          left: result
-          right: right
-      result
-    else
-      if lookahead and lookahead.type is "+"
-        match "+"
-        right = expression()
-        result =
-          type: "+"
           left: result
           right: right
       result
