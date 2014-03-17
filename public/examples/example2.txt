@@ -1,2 +1,0 @@
-a = 4*2;
-if a > 6 then p a
