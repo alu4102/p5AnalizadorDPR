@@ -45,8 +45,12 @@ String::tokens = ->
     p:    "P"
     "if": "IF"
     then: "THEN"
-    odd: "odd"
-    call: "call"
+    while: "WHILE"
+    do: "DO"
+    call: "CALL"
+    odd: "ODD"
+    begin: "BEGIN"
+    end: "END"
   
   # Make a token object.
   make = (type, value) ->
@@ -139,6 +143,7 @@ parse = (input) ->
       left =
         type: "ID"
         value: lookahead.value
+
       match "ID"
       match "="
       right = expression()
@@ -146,15 +151,15 @@ parse = (input) ->
         type: "="
         left: left
         right: right
-    else if lookahead and lookahead.type is "call"
-	  match "call"
-	  rigth = 
-		type: "ID"
-		value: lookahead.value
-	  match "ID"
-	  result = 
-		type: "call"
-		rigth: rigth  
+    else if lookahead and lookahead.type is "CALL"
+      match "CALL"
+      rama =
+        type: "ID"
+        value: lookahead.value
+      match "ID"
+      result = 
+         type: "call"
+         rigth: rama
     else if lookahead and lookahead.type is "P"
       match "P"
       right = expression()
@@ -170,6 +175,30 @@ parse = (input) ->
         type: "IF"
         left: left
         right: right
+    else if lookahead and lookahead.type is "WHILE"
+      match "WHILE"
+      left = condition()
+      match "DO"
+      right = statement()
+      result =
+        type: "WHILE"
+        left: left
+        right: right
+    else if lookahead and lookahead.type is "BEGIN"
+      match "BEGIN"
+      left = statement()
+      match ";"
+      while lookahead and lookahead.type isnt "END"
+        aux = statement()
+        resultAux =
+          left: resultAux
+          right: aux
+        match ";"
+      result =
+        type: "BEGIN"
+        left: left
+        right: resultAux
+      match "END"
     else # Error!
       throw "Syntax Error. Expected identifier but found " + 
         (if lookahead then lookahead.value else "end of input") + 
@@ -177,22 +206,23 @@ parse = (input) ->
     result
 
   condition = ->
-	if lookahead and lookahead.type is "odd"
-	  match "odd"
-	  right = expression()
-	  result =
-		type: "odd"
-		value: rigth
-	else 
-	  left = expression()
-	  type = lookahead.value
-	  match "COMPARISON"
-	  right = expression()
-	  result =
-		type: type
-		left: left
-		right: right
-	  result
+    if lookahead and lookahead.type is "ODD"
+      match "ODD"
+      right = expression()
+      result =
+        type: "ODD"
+        right: right
+      result
+    else
+      left = expression()
+      type = lookahead.value
+      match "COMPARISON"
+      right = expression()
+      result =
+        type: type
+        left: left
+        right: right
+      result
 
   expression = ->
     result = term()
@@ -213,6 +243,15 @@ parse = (input) ->
         right = term()
         result =
           type: type
+          left: result
+          right: right
+      result
+    else
+      if lookahead and lookahead.type is "+"
+        match "+"
+        right = expression()
+        result =
+          type: "+"
           left: result
           right: right
       result
