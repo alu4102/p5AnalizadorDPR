@@ -9,11 +9,29 @@ main = function() {
     result = _error;
     result = "<div class=\"error\">" + result + "</div>";
   }
-  return OUTPUT.innerHTML = result;
+  OUTPUT.innerHTML = result;
+  if (window.localStorage) {
+    localStorage.INPUT = source;
+    return localStorage.OUTPUT = result;
+  }
 };
 
 window.onload = function() {
-  return PARSE.onclick = main;
+  if (window.localStorage && localStorage.INPUT && localStorage.OUTPUT) {
+    document.getElementById("original").innerHTML = localStorage.INPUT;
+    document.getElementById("OUTPUT").innerHTML = localStorage.OUTPUT;
+  }
+  PARSE.onclick = main;
+  $("#cssmenu").prepend("<div id=\"menu-button\">Menu</div>");
+  return $("#cssmenu #menu-button").on("click", function() {
+    var menu;
+    menu = $(this).next("ul");
+    if (menu.hasClass("open")) {
+      menu.removeClass("open");
+    } else {
+      menu.addClass("open");
+    }
+  });
 };
 
 Object.constructor.prototype.error = function(message, t) {
@@ -48,12 +66,20 @@ String.prototype.tokens = function() {
     ONELINECOMMENT: /\/\/.*/g,
     MULTIPLELINECOMMENT: /\/[*](.|\n)*?[*]\//g,
     COMPARISONOPERATOR: /[<>=!]=|[<>]/g,
-    ONECHAROPERATORS: /([-+*\/=()&|;:,{}[\]])/g
+    ADDOP: /[+-]/g,
+    DIVMULTOP: /[*\/]/g,
+    ONECHAROPERATORS: /([*=()&|;:,{}[\]])/g
   };
   RESERVED_WORD = {
     p: "P",
     "if": "IF",
-    then: "THEN"
+    then: "THEN",
+    "while": "WHILE",
+    "do": "DO",
+    call: "CALL",
+    odd: "ODD",
+    begin: "BEGIN",
+    end: "END"
   };
   make = function(type, value) {
     return {
@@ -96,6 +122,10 @@ String.prototype.tokens = function() {
       }
     } else if (m = tokens.STRING.bexec(this)) {
       result.push(make("STRING", getTok().replace(/^["']|["']$/g, "")));
+    } else if (m = tokens.ADDOP.bexec(this)) {
+      result.push(make("ADDOP", getTok()));
+    } else if (m = tokens.DIVMULTOP.bexec(this)) {
+      result.push(make("DIVMULTOP", getTok()));
     } else if (m = tokens.COMPARISONOPERATOR.bexec(this)) {
       result.push(make("COMPARISON", getTok()));
     } else if (m = tokens.ONECHAROPERATORS.bexec(this)) {
@@ -135,7 +165,7 @@ parse = function(input) {
     }
   };
   statement = function() {
-    var left, result, right;
+    var aux, left, rama, result, resultAux, right;
     result = null;
     if (lookahead && lookahead.type === "ID") {
       left = {
@@ -149,6 +179,17 @@ parse = function(input) {
         type: "=",
         left: left,
         right: right
+      };
+    } else if (lookahead && lookahead.type === "CALL") {
+      match("CALL");
+      rama = {
+        type: "ID",
+        value: lookahead.value
+      };
+      match("ID");
+      result = {
+        type: "call",
+        rigth: rama
       };
     } else if (lookahead && lookahead.type === "P") {
       match("P");
@@ -167,6 +208,34 @@ parse = function(input) {
         left: left,
         right: right
       };
+    } else if (lookahead && lookahead.type === "WHILE") {
+      match("WHILE");
+      left = condition();
+      match("DO");
+      right = statement();
+      result = {
+        type: "WHILE",
+        left: left,
+        right: right
+      };
+    } else if (lookahead && lookahead.type === "BEGIN") {
+      match("BEGIN");
+      left = statement();
+      match(";");
+      while (lookahead && lookahead.type !== "END") {
+        aux = statement();
+        resultAux = {
+          left: resultAux,
+          right: aux
+        };
+        match(";");
+      }
+      result = {
+        type: "BEGIN",
+        left: left,
+        right: resultAux
+      };
+      match("END");
     } else {
       throw "Syntax Error. Expected identifier but found " + (lookahead ? lookahead.value : "end of input") + (" near '" + (input.substr(lookahead.from)) + "'");
     }
@@ -174,30 +243,66 @@ parse = function(input) {
   };
   condition = function() {
     var left, result, right, type;
-    left = expression();
-    type = lookahead.value;
-    match("COMPARISON");
-    right = expression();
-    result = {
-      type: type,
-      left: left,
-      right: right
-    };
-    return result;
-  };
-  expression = function() {
-    var result, right;
-    result = term();
-    if (lookahead && lookahead.type === "+") {
-      match("+");
+    if (lookahead && lookahead.type === "ODD") {
+      match("ODD");
       right = expression();
       result = {
-        type: "+",
-        left: result,
+        type: "ODD",
         right: right
       };
+      return result;
+    } else {
+      left = expression();
+      type = lookahead.value;
+      match("COMPARISON");
+      right = expression();
+      result = {
+        type: type,
+        left: left,
+        right: right
+      };
+      return result;
     }
-    return result;
+  };
+  expression = function() {
+    var result, right, type;
+    result = term();
+    if (lookahead && lookahead.type === "ADDOP") {
+      while (lookahead && lookahead.type === "ADDOP") {
+        type = lookahead.value;
+        match("ADDOP");
+        right = term();
+        result = {
+          type: type,
+          left: result,
+          right: right
+        };
+      }
+      return result;
+    } else if (lookahead && lookahead.type === "DIVMULTOP") {
+      while (lookahead && lookahead.type === "DIVMULTOP") {
+        type = lookahead.value;
+        match("DIVMULTOP");
+        right = term();
+        result = {
+          type: type,
+          left: result,
+          right: right
+        };
+      }
+      return result;
+    } else {
+      if (lookahead && lookahead.type === "+") {
+        match("+");
+        right = expression();
+        result = {
+          type: "+",
+          left: result,
+          right: right
+        };
+      }
+      return result;
+    }
   };
   term = function() {
     var result, right;
@@ -243,4 +348,3 @@ parse = function(input) {
   }
   return tree;
 };
-
