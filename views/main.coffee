@@ -6,9 +6,15 @@ main = ()->
     result = """<div class="error">#{result}</div>"""
 
   OUTPUT.innerHTML = result
+  if window.localStorage
+    localStorage.INPUT = source
+    localStorage.OUTPUT = result
 
 window.onload = ()-> 
   PARSE.onclick = main
+  if window.localStorage and localStorage.ORIGINAL and localStorage.OUTPUT
+    document.getElementById("original").innerHTML = localStorage.INPUT
+    document.getElementById("OUTPUT").innerHTML = localStorage.OUTPUT
 
 Object.constructor::error = (message, t) ->
   t = t or this
@@ -45,6 +51,12 @@ String::tokens = ->
     p:    "P"
     "if": "IF"
     then: "THEN"
+    while: "WHILE"
+    do: "DO"
+    call: "CALL"
+    odd: "ODD"
+    begin: "BEGIN"
+    end: "END"
   
   # Make a token object.
   make = (type, value) ->
@@ -145,6 +157,15 @@ parse = (input) ->
         type: "="
         left: left
         right: right
+    else if lookahead and lookahead.type is "CALL"
+      match "CALL"
+      rama =
+        type: "ID"
+        value: lookahead.value
+      match "ID"
+      result = 
+         type: "call"
+         rigth: rama
     else if lookahead and lookahead.type is "P"
       match "P"
       right = expression()
@@ -160,6 +181,30 @@ parse = (input) ->
         type: "IF"
         left: left
         right: right
+    else if lookahead and lookahead.type is "WHILE"
+      match "WHILE"
+      left = condition()
+      match "DO"
+      right = statement()
+      result =
+        type: "WHILE"
+        left: left
+        right: right
+    else if lookahead and lookahead.type is "BEGIN"
+      match "BEGIN"
+      left = statement()
+      match ";"
+      while lookahead and lookahead.type isnt "END"
+        aux = statement()
+        resultAux =
+          left: resultAux
+          right: aux
+        match ";"
+      result =
+        type: "BEGIN"
+        left: left
+        right: resultAux
+      match "END"
     else # Error!
       throw "Syntax Error. Expected identifier but found " + 
         (if lookahead then lookahead.value else "end of input") + 
@@ -167,15 +212,23 @@ parse = (input) ->
     result
 
   condition = ->
-    left = expression()
-    type = lookahead.value
-    match "COMPARISON"
-    right = expression()
-    result =
-      type: type
-      left: left
-      right: right
-    result
+    if lookahead and lookahead.type is "ODD"
+      match "ODD"
+      right = expression()
+      result =
+        type: "ODD"
+        right: right
+      result
+    else
+      left = expression()
+      type = lookahead.value
+      match "COMPARISON"
+      right = expression()
+      result =
+        type: type
+        left: left
+        right: right
+      result
 
   expression = ->
     result = term()
@@ -196,6 +249,15 @@ parse = (input) ->
         right = term()
         result =
           type: type
+          left: result
+          right: right
+      result
+    else
+      if lookahead and lookahead.type is "+"
+        match "+"
+        right = expression()
+        result =
+          type: "+"
           left: result
           right: right
       result
