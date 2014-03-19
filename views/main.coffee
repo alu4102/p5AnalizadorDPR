@@ -68,6 +68,9 @@ String::tokens = ->
     odd: "ODD"
     begin: "BEGIN"
     end: "END"
+    "const": "CONST"
+    "var": "VAR"
+    procedure: "PROCEDURE"
   
   # Make a token object.
   make = (type, value) ->
@@ -148,11 +151,68 @@ parse = (input) ->
     return
 
   statements = ->
-    result = [statement()]
+    result = [sentence()]
     while lookahead and lookahead.type is ";"
       match ";"
-      result.push statement()
+      result.push sentence()
     (if result.length is 1 then result[0] else result)
+
+  sentence = ->   
+    if lookahead and lookahead.type is "." 
+      match "."
+    else
+      result = block()  
+    result    
+
+  block = ->
+    result = null
+    if lookahead and lookahead.type is "CONST"    
+      while lookahead and (lookahead.type is "CONST" or lookahead.type is ",")
+        if lookahead.type is "CONST"
+          match "CONST"
+        else if lookahead.type is ","
+          match ","
+        left =
+          type: "ID"
+          value: lookahead.value
+        match "ID"
+        match "="
+        right =
+          type: "NUM"
+          value: lookahead.value
+        match "NUM"
+        result =
+          type: "CONST"
+          left: left
+          right: right   
+        result
+    else if lookahead and lookahead.type is "VAR" 
+      while lookahead and (lookahead.type is "VAR" or lookahead.type is ",")
+        if lookahead.type is "VAR"
+          match "VAR"
+        else if lookahead.type is ","
+          match ","
+        result =
+          type: "VAR"
+          value: lookahead.value
+        match "ID"
+        result
+    else if lookahead and lookahead.type is "PROCEDURE"    
+      match "PROCEDURE"
+      left = lookahead.value
+      match "ID"
+      match ";"
+      right = block()
+      match ";"
+      leftTree =
+        left: left
+        right: right
+      result =
+        left: leftTree
+        right: statements()
+      result
+    else      
+      result = [statement()]
 
   statement = ->
     result = null
@@ -243,43 +303,24 @@ parse = (input) ->
 
   expression = ->
     result = term()
-    if lookahead and lookahead.type is "ADDOP"
-      while lookahead and lookahead.type is "ADDOP"
-        type = lookahead.value
-        match "ADDOP"
-        right = term()
-        result =
-          type: type
-          left: result
-          right: right
-      result
-    else if lookahead and lookahead.type is "DIVMULTOP"
-      while lookahead and lookahead.type is "DIVMULTOP"
-        type = lookahead.value
-        match "DIVMULTOP"
-        right = term()
-        result =
-          type: type
-          left: result
-          right: right
-      result
-    else
-      if lookahead and lookahead.type is "+"
-        match "+"
-        right = expression()
-        result =
-          type: "+"
-          left: result
-          right: right
-      result
+    while lookahead and lookahead.type is "ADDOP"
+      type = lookahead.value
+      match "ADDOP"
+      right = term()
+      result =
+        type: type
+        left: result
+        right: right
+    result
 
   term = ->
     result = factor()
-    if lookahead and lookahead.type is "*"
-      match "*"
-      right = term()
+    while lookahead and lookahead.type is "DIVMULTOP"
+      type = lookahead.value
+      match "DIVMULTOP"
+      right = factor()
       result =
-        type: "*"
+        type: type
         left: result
         right: right
     result
