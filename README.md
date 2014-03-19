@@ -3,13 +3,33 @@
 
 ## Descripción
 
-El objetivo de esta práctica es 
+El objetivo de esta práctica es extender y modificar el analizador para que acepte el lenguaje descrito por la gramática EBFN del lenguaje PL/0 que se describe en la 
+siguiente entrada de la Wikipedia: [Recursive descent parser](http://en.wikipedia.org/wiki/Recursive_descent_parser)
 
-## Enlaces 
+##Desarrollo
 
-[Despliegue en Heroku]()
+Los lenguajes y herramientas más utilizados para el desarrollo del presente proyecto fueron: 
 
-[Test]()
+  *CoffeeScript
+  *Slim
+  *Sass
+  *Heroku
+  *Sinatra
+  *Ruby
+
+## Enlaces
+
+Adrián:
+
+[Despliegue en Heroku](http://p5analizador.herokuapp.com/)
+
+[Test](http://p5analizador.herokuapp.com/tests)
+
+Sara:
+
+[Despliegue en Heroku](p5-analizador-dp.herokuapp.com)
+
+[Test](p5-analizador-dp.herokuapp.com/tests)
 
 ## Autores
 
@@ -18,4 +38,4 @@ El objetivo de esta práctica es
 
 ## Licencia
 
-MIT
+Este proyecto se distribuye bajo la licencia MIT. Para saber más, leer el fichero 'licenciaMIT'.
