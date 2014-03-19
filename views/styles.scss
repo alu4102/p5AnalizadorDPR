@@ -141,8 +141,8 @@ nav a.current {
 }
 
 #mocha {
-  font: 20px / 1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  margin: 60px 50px;
+  font: 20px / 1.5 "Avant Garde", Avantgarde, "Century Gothic", CenturyGothic, "AppleGothic", sans-serif;
+  margin: 10px 20px;
   ul, li {
     margin: 0;
     padding: 0;
@@ -159,7 +159,7 @@ nav a.current {
     font-weight: 200;
     a {
       text-decoration: none;
-      color: inherit;
+      color: #0066FF;
       &:hover {
         text-decoration: underline;
       }
