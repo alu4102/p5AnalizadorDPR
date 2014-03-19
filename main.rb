@@ -31,7 +31,7 @@ helpers do
   end
   
   def set_title
-    @title ||= "Predictive Recursive Descent Parser"
+    @title ||= "Analizador Descendente Predictivo Recursivo"
   end
 end
 
