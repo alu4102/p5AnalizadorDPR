@@ -10,12 +10,12 @@ siguiente entrada de la Wikipedia: [Recursive descent parser](http://en.wikipedi
 
 Los lenguajes y herramientas más utilizados para el desarrollo del presente proyecto fueron: 
 
-  *CoffeeScript
-  *Slim
-  *Sass
-  *Heroku
-  *Sinatra
-  *Ruby
+  * CoffeeScript
+  * Slim
+  * Sass
+  * Heroku
+  * Sinatra
+  * Ruby
 
 ## Enlaces
 
@@ -27,9 +27,9 @@ Adrián:
 
 Sara:
 
-[Despliegue en Heroku](p5-analizador-dp.herokuapp.com)
+[Despliegue en Heroku](http://p5-analizador-dp.herokuapp.com)
 
-[Test](p5-analizador-dp.herokuapp.com/tests)
+[Test](http://p5-analizador-dp.herokuapp.com/tests)
 
 ## Autores
 
@@ -38,4 +38,4 @@ Sara:
 
 ## Licencia
 
-Este proyecto se distribuye bajo la licencia MIT. Para saber más, leer el fichero 'licenciaMIT'.
+Este proyecto se distribuye bajo la licencia MIT. Para saber más, leer el fichero ['licenciaMIT'](https://github.com/alu4102/p5AnalizadorDPR/blob/sara/licenciaMIT.txt).
