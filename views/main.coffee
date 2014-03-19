@@ -150,19 +150,12 @@ parse = (input) ->
             input.substr(lookahead.from) + "'"
     return
 
-  statements = ->
-    result = [sentence()]
+  program = ->
+    result = [block()]
     while lookahead and lookahead.type is ";"
       match ";"
-      result.push sentence()
+      result.push block()
     (if result.length is 1 then result[0] else result)
-
-  sentence = ->   
-    if lookahead and lookahead.type is "." 
-      match "."
-    else
-      result = block()  
-    result    
 
   block = ->
     result = null
@@ -209,7 +202,7 @@ parse = (input) ->
         right: right
       result =
         left: leftTree
-        right: statements()
+        right: statement()
       result
     else      
       result = [statement()]
@@ -349,9 +342,9 @@ parse = (input) ->
         " near '" + input.substr(lookahead.from) + "'"
     result
 
-  tree = statements(input)
+  tree = program(input)
   if lookahead?
-    throw "Syntax Error parsing statements. " + 
+    throw "Syntax Error parsing program. " + 
       "Expected 'end of input' and found '" + 
       input.substr(lookahead.from) + "'"  
   tree

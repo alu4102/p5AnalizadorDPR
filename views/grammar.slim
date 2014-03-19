@@ -33,27 +33,37 @@ ol
 
 ol
   li
-    |  $\Sigma = \{ ; =, ID, P, IF, THEN, <, >, <=, >=, ==, !=,  +, *, (, ), NUM \}$, 
+    |  $\Sigma = \{ ; =, ID, P, IF, THEN, WHILE, DO, CALL, ODD, BEGIN, END, CONST, VAR, PROCEDURE <, >, <=, >=, ==, !=,  +, *, (, ), NUM \}$
   li
-    |  $V = \{ statements, statement, condition, expression, term, factor \}$ 
+    |  $V = \{ block, statement, condition, expression, term, factor \}$ 
   li
     |  Productions: 
     ol
+	  li
+		|  program $ \rightarrow$ block 
       li
-        |  statements $ \rightarrow$ statement ';' statements $\vert$ statement 
+        |  block $ \rightarrow$ [CONST ID '=' NUM {',' ID '=' NUM} ';']  $\vert$  [VAR ID {',' ID} ';']  $\vert$  {PROCEDURE ID ';' block ';'} statement
       li
-        |  statement $ \rightarrow$ ID '=' expression $\vert$ P expression 
+        |  statement $ \rightarrow$ ID '=' expression  $\vert$  CALL ID
+        |  $ \vert$ BEGIN statement ';' {statement ';'} END
         |  $ \vert$ IF condition THEN statement 
+        |  $ \vert$ WHILE condition DO statement
       li
-        | condition $ \rightarrow$ expression ('=='|'!='|'<'|'<='|'>'|'>=') expression 
+        | condition $ \rightarrow$ ODD expression  $\vert$  expression ('=='|'!='|'<'|'<='|'>'|'>=') expression
       li
-        |  expression $ \rightarrow$ term '+' expression $\vert$ term 
+        |  expression $ \rightarrow$ ['+'|'-'] term {('+'|'-') term} 
       li
-        |  term $ \rightarrow$ factor '*' term $\vert$ factor 
+        |  term $ \rightarrow$ factor {('*'|'/')} factor 
       li
-        |  factor $ \rightarrow$ '(' expression ')' $\vert$ ID $ \vert$ NUM 
+        |  factor $ \rightarrow$ NUM $\vert$  ID $ \vert$ '(' expression ')' 
   li
-    |  Start symbol: $statements$ 
+    |  Start symbol: $block$ 
 br
 br
 br
+#header.hidden
+  div
+    textarea#original[autofocus cols="80" rows="5"]
+  div
+input#PARSE.hidden[value="parse" type="button"]
+pre#OUTPUT.hidden
