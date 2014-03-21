@@ -1,2 +1,6 @@
-a = 4*2;
-if a > 6 then p a
+const miConst1 = 100, miConst2 = 500;
+var miVar1;
+procedure miFuncion; var miVar2;
+begin
+  miVar1 = 150 + 300 / 1000;
+end
